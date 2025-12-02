@@ -39,7 +39,18 @@
   
 </div>
 
-## 📚 String append() - 11 Overloaded Variants 🔗
+<br>
+
+# 📖 Table of Contents - Interactive Library Guide
+
+Click on any section to expand/collapse the content!
+
+---
+
+## 📚 `<string>` Library
+
+<details>
+<summary><b>🔹 String append() - 11 Overloaded Variants</b></summary>
 
 ### Quick Reference Table
 | Overload | Meaning | Example | Result |
@@ -56,9 +67,9 @@
 | `append(string_view)` | Full string_view | `append(sv)` | `"Alice"` |
 | `append(sv, pos, count)` | string_view substring | `append(sv, 4, 3)` | `"app"` |
 
----
+<details>
+<summary><b>Method 1️⃣: append(const string& str)</b></summary>
 
-### Method 1️⃣: append(const string& str)
 **Purpose:** Appends the entire string
 
 ```cpp
@@ -70,9 +81,11 @@ cout << s;  // Output: Hello World
 
 **Use Case:** Concatenating complete strings
 
----
+</details>
 
-### Method 2️⃣: append(const string& str, size_t pos)
+<details>
+<summary><b>Method 2️⃣: append(const string& str, size_t pos)</b></summary>
+
 **Purpose:** Appends substring from position `pos` to end
 
 ```cpp
@@ -86,9 +99,11 @@ cout << s;          // Output: Data DEFG
 
 **Use Case:** Extracting suffix of a string
 
----
+</details>
 
-### Method 3️⃣: append(const string& str, size_t pos, size_t count)
+<details>
+<summary><b>Method 3️⃣: append(const string& str, size_t pos, size_t count)</b></summary>
+
 **Purpose:** Appends substring from `pos` for `count` characters
 
 ```cpp
@@ -100,9 +115,11 @@ cout << s;          // Output: Data BC
 
 **Use Case:** Extracting specific substring range
 
----
+</details>
 
-### Method 4️⃣: append(const char* cstr)
+<details>
+<summary><b>Method 4️⃣: append(const char* cstr)</b></summary>
+
 **Purpose:** Appends a null-terminated C-string
 
 ```cpp
@@ -113,9 +130,11 @@ cout << s;          // Output: ID: Alpha
 
 **Use Case:** Adding literal strings or C-style strings
 
----
+</details>
 
-### Method 5️⃣: append(const char* cstr, size_t count)
+<details>
+<summary><b>Method 5️⃣: append(const char* cstr, size_t count)</b></summary>
+
 **Purpose:** Appends first `count` characters from C-string
 
 ```cpp
@@ -127,9 +146,11 @@ cout << s;          // Output: Code: ABC
 
 **Use Case:** Partial C-string concatenation
 
----
+</details>
 
-### Method 6️⃣: append(size_t count, char ch)
+<details>
+<summary><b>Method 6️⃣: append(size_t count, char ch)</b></summary>
+
 **Purpose:** Appends character `ch` repeated `count` times
 
 ```cpp
@@ -147,9 +168,11 @@ line.append(40, '-');
 cout << line;       // Output: ----------------------------------------
 ```
 
----
+</details>
 
-### Method 7️⃣: append(InputIterator first, InputIterator last)
+<details>
+<summary><b>Method 7️⃣: append(InputIterator first, InputIterator last)</b></summary>
+
 **Purpose:** Appends range of characters from iterators
 
 ```cpp
@@ -169,9 +192,11 @@ cout << result;     // Output: Chars: ABCD
 
 **Use Case:** Building strings from iterators, vectors, or containers
 
----
+</details>
 
-### Method 8️⃣: append(const char* first, const char* last)
+<details>
+<summary><b>Method 8️⃣: append(const char* first, const char* last)</b></summary>
+
 **Purpose:** Appends characters from memory range `[first, last)`
 
 ```cpp
@@ -188,9 +213,11 @@ cout << s;          // Output: Start CDE
 
 **Use Case:** Working with C-style string pointers and ranges
 
----
+</details>
 
-### Method 9️⃣: append(initializer_list<char>)
+<details>
+<summary><b>Method 9️⃣: append(initializer_list&lt;char&gt;)</b></summary>
+
 **Purpose:** Adds characters written inside `{}`
 
 ```cpp
@@ -208,9 +235,11 @@ cout << password;   // Output: Pass@123
 
 **Use Case:** Inline character lists (C++11+), rarely used but elegant
 
----
+</details>
 
-### Method 🔟: append(string_view sv)
+<details>
+<summary><b>Method 🔟: append(string_view sv)</b></summary>
+
 **Purpose:** Appends everything from `string_view`
 
 ```cpp
@@ -224,9 +253,11 @@ cout << s;          // Output: Name: Alice
 
 **Use Case:** Modern C++17+ code with string_view parameters
 
----
+</details>
 
-### Method 1️⃣1️⃣: append(string_view sv, size_t pos, size_t count = npos)
+<details>
+<summary><b>Method 1️⃣1️⃣: append(string_view sv, size_t pos, size_t count = npos)</b></summary>
+
 **Purpose:** Appends a substring of `string_view`
 
 ```cpp
@@ -245,9 +276,9 @@ cout << s;            // Output: Fruit: app
 
 **Use Case:** Efficient substring extraction from string_view without copies
 
----
+</details>
 
-## 🎯 All Modern Methods at a Glance
+### 🎯 All Modern Methods at a Glance
 
 | Syntax | Example | Output |
 |--------|---------|--------|
@@ -256,11 +287,9 @@ cout << s;            // Output: Fruit: app
 | `append(string_view)` | `append(sv)` | `"Alice"` |
 | `append(sv, pos, count)` | `append(sv, 4, 3)` | `"app"` |
 
----
+### 🎯 Common Patterns & Tips
 
-## 🎯 Common Patterns & Tips
-
-### Pattern 1: Building Dynamic Strings
+**Pattern 1: Building Dynamic Strings**
 ```cpp
 string result = "";
 result.append("User: ");
@@ -271,7 +300,7 @@ result.append(")");
 // Output: User: John (ID: 12345)
 ```
 
-### Pattern 2: Creating Formatted Output
+**Pattern 2: Creating Formatted Output**
 ```cpp
 string header = "";
 header.append(20, '=');
@@ -280,7 +309,7 @@ header.append(20, '=');
 // Output: ==================== REPORT ====================
 ```
 
-### Pattern 3: Efficient Substring Extraction
+**Pattern 3: Efficient Substring Extraction**
 ```cpp
 string data = "2024-12-02";
 string year = "";
@@ -291,20 +320,92 @@ month.append(data, 5, 2);   // Extract month: "12"
 
 **Benefit:** Fast string concatenation without creating temporary objects, especially useful in loops
 
----
-
-## 💡 Performance Notes
+### 💡 Performance Notes
 
 - **append() vs operator+:** `append()` is generally faster for multiple concatenations
 - **Reserve space:** Use `s.reserve(size)` before multiple appends to avoid reallocations
 - **Return value:** All `append()` overloads return reference to `*this`, allowing chaining
 
-### Chaining Example
+**Chaining Example:**
 ```cpp
 string s = "C++";
 s.append(" is").append(" ").append("awesome!");
 cout << s;  // Output: C++ is awesome!
 ```
+
+</details>
+
+<details>
+<summary><b>🔹 String substr() - Extract Substrings</b></summary>
+
+### Coming Soon! 🚧
+Add your `substr()` documentation here with all variants and examples.
+
+</details>
+
+<details>
+<summary><b>🔹 String find() - Search Operations</b></summary>
+
+### Coming Soon! 🚧
+Add your `find()` documentation here with all variants and examples.
+
+</details>
+
+---
+
+## 🗂️ `<algorithm>` Library
+
+<details>
+<summary><b>🔹 sort() - Sorting Operations</b></summary>
+
+### Coming Soon! 🚧
+Add your `sort()` documentation here with custom comparators.
+
+</details>
+
+<details>
+<summary><b>🔹 binary_search() - Search in Sorted Range</b></summary>
+
+### Coming Soon! 🚧
+Add your `binary_search()` documentation here.
+
+</details>
+
+---
+
+## 📦 `<vector>` Library
+
+<details>
+<summary><b>🔹 Vector Operations</b></summary>
+
+### Coming Soon! 🚧
+Add your vector operations documentation here.
+
+</details>
+
+---
+
+## 🗺️ `<map>` & `<unordered_map>` Library
+
+<details>
+<summary><b>🔹 Map Operations</b></summary>
+
+### Coming Soon! 🚧
+Add your map operations documentation here.
+
+</details>
+
+---
+
+## 🔢 `<queue>` & `<priority_queue>` Library
+
+<details>
+<summary><b>🔹 Priority Queue with Custom Comparators</b></summary>
+
+### Coming Soon! 🚧
+Add your priority queue documentation here (you can copy from your STL Quick Help repo!).
+
+</details>
 
 ---
 
@@ -313,6 +414,9 @@ cout << s;  // Output: C++ is awesome!
 </div>
 
 ## 📝 Important Note: C++ String Parameter Pattern 📌
+
+<details>
+<summary><b>Click to expand: Understanding pos/length Pattern</b></summary>
 
 In C++ (especially with `std::string`, containers, and algorithms), the most common pattern for built-in library functions is:
 
@@ -386,10 +490,14 @@ append(it_begin, it_end);    // range [begin, end)
 
 **Other than these two exceptions**, the C++ string library follows `pos/length` everywhere.
 
+</details>
+
 ---
 
 <div align="center">
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
   <br>
   <i>Happy Coding! 🚀</i>
+  <br><br>
+  <b>⭐ Star this repo if you find it helpful! ⭐</b>
 </div>
