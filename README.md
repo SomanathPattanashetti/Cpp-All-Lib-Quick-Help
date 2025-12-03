@@ -353,6 +353,1263 @@ Add your `find()` documentation here with all variants and examples.
 
 ---
 
+## 📁 `<fstream>` Library - File I/O Operations
+
+<details>
+<summary><b>🔹 File Stream Classes - The Foundation</b></summary>
+
+### ✅ 1️⃣ File Stream Classes
+
+These are the 3 most important classes for file operations:
+
+| Class | Meaning | Primary Use |
+|-------|---------|-------------|
+| `ifstream` | Input File Stream | Read from files |
+| `ofstream` | Output File Stream | Write to files |
+| `fstream` | File Stream | Both read + write |
+
+#### Declaration Examples:
+
+```cpp
+#include <fstream>
+
+// Read only
+ifstream inputFile("data.txt");
+
+// Write only
+ofstream outputFile("output.txt");
+
+// Read and Write
+fstream file("data.txt", ios::in | ios::out);
+```
+
+**Use Cases:**
+- `ifstream` → Reading configuration files, processing input data
+- `ofstream` → Logging, saving results, creating reports
+- `fstream` → Database-like operations where you need both read/write
+
+</details>
+
+<details>
+<summary><b>🔹 File Opening Modes - Control File Behavior</b></summary>
+
+### ✅ 2️⃣ Important File Opening Modes
+
+| Mode | Meaning | Effect |
+|------|---------|--------|
+| `ios::in` | Open for reading | File must exist |
+| `ios::out` | Open for writing | Creates if doesn't exist |
+| `ios::app` | Append mode | Write at end, preserves content |
+| `ios::trunc` | Truncate mode | Deletes existing contents |
+| `ios::binary` | Binary mode | No text conversions |
+| `ios::ate` | At End | Opens and moves to end immediately |
+
+#### Combining Modes (Using `|` operator):
+
+```cpp
+// Read and Write
+fstream file("data.txt", ios::in | ios::out);
+
+// Append mode (write at end)
+ofstream log("app.log", ios::app);
+
+// Overwrite existing file
+ofstream file("output.txt", ios::out | ios::trunc);
+
+// Binary read/write
+fstream binFile("image.png", ios::in | ios::out | ios::binary);
+
+// Open and go to end
+ifstream file("data.txt", ios::ate);
+```
+
+#### Common Combinations:
+
+```cpp
+// Safe read (won't create file if doesn't exist)
+ifstream in("config.txt", ios::in);
+
+// Safe append (won't delete existing content)
+ofstream log("debug.log", ios::app);
+
+// Complete overwrite
+ofstream out("result.txt", ios::out | ios::trunc);
+
+// Read/Write without deleting
+fstream rw("database.dat", ios::in | ios::out);
+```
+
+**Pro Tip:** `ios::out` automatically includes `ios::trunc` unless combined with `ios::in` or `ios::app`
+
+</details>
+
+<details>
+<summary><b>🔹 Opening and Closing Files</b></summary>
+
+### ✅ 3️⃣ `.open()` - Open File After Declaration
+
+**Syntax:** `stream.open(filename, mode)`
+
+```cpp
+ifstream in;
+in.open("input.txt");
+
+ofstream out;
+out.open("output.txt", ios::app);
+
+fstream file;
+file.open("data.txt", ios::in | ios::out);
+```
+
+#### Why Use `.open()` Separately?
+
+```cpp
+// Useful when filename is determined at runtime
+string filename;
+cout << "Enter filename: ";
+cin >> filename;
+
+ifstream file;
+file.open(filename);
+
+if (!file.is_open()) {
+    cout << "Could not open: " << filename << endl;
+}
+```
+
+#### Reusing Stream Objects:
+
+```cpp
+ifstream in;
+
+// Process multiple files
+in.open("file1.txt");
+// ... process file1 ...
+in.close();
+
+in.open("file2.txt");
+// ... process file2 ...
+in.close();
+```
+
+---
+
+### ✅ 4️⃣ `.close()` - Close File
+
+**Purpose:** Flush buffers and release file handle
+
+```cpp
+ifstream in("data.txt");
+// ... read operations ...
+in.close();
+```
+
+#### Why Close Files?
+
+```cpp
+// Example: Proper resource management
+void processFile(string filename) {
+    ifstream in(filename);
+    
+    if (!in.is_open()) {
+        return;
+    }
+    
+    // Process file...
+    string line;
+    while (getline(in, line)) {
+        cout << line << endl;
+    }
+    
+    in.close();  // Release file handle
+}
+
+// Now other programs can access the file
+```
+
+**Important:** Files are automatically closed when stream object goes out of scope, but explicit closing is good practice!
+
+</details>
+
+<details>
+<summary><b>🔹 Error Checking - Validate File Operations</b></summary>
+
+### ✅ 5️⃣ `.is_open()` - Check if File Opened Successfully
+
+**Returns:** `true` if file is open, `false` otherwise
+
+```cpp
+ifstream file("config.txt");
+
+if (!file.is_open()) {
+    cout << "Error: File not found!" << endl;
+    return 1;
+}
+
+// Safe to proceed with file operations
+string data;
+file >> data;
+```
+
+#### Real-World Pattern:
+
+```cpp
+bool loadConfig(const string& filename) {
+    ifstream config(filename);
+    
+    if (!config.is_open()) {
+        cerr << "Failed to open config: " << filename << endl;
+        return false;
+    }
+    
+    // Load configuration...
+    config.close();
+    return true;
+}
+```
+
+---
+
+### ✅ 6️⃣ `.fail()` - Check Stream State
+
+**Returns:** `true` if stream is in failed state
+
+```cpp
+ifstream in("data.txt");
+
+if (in.fail()) {
+    cout << "Error: Failed to open file!" << endl;
+}
+
+// Also useful after read operations
+int number;
+in >> number;
+
+if (in.fail()) {
+    cout << "Error: Invalid data format!" << endl;
+}
+```
+
+#### Difference Between `.fail()` and `.is_open()`:
+
+```cpp
+ifstream in("data.txt");
+
+// .is_open() → checks if file handle is valid
+if (!in.is_open()) {
+    cout << "File doesn't exist or can't be opened" << endl;
+}
+
+// .fail() → checks if last operation failed
+in >> data;
+if (in.fail()) {
+    cout << "Read operation failed" << endl;
+}
+```
+
+#### Complete Error Checking Pattern:
+
+```cpp
+ifstream in("numbers.txt");
+
+if (!in.is_open()) {
+    cerr << "Cannot open file!" << endl;
+    return;
+}
+
+int num;
+while (in >> num) {
+    if (in.fail()) {
+        cerr << "Read error occurred!" << endl;
+        in.clear();  // Clear error flags
+        break;
+    }
+    cout << num << " ";
+}
+
+in.close();
+```
+
+</details>
+
+<details>
+<summary><b>🔹 Reading from Files - 4 Methods</b></summary>
+
+### ✅ 7️⃣ Reading Functions
+
+<details>
+<summary><b>Method A: Using `>>` operator (Word by Word)</b></summary>
+
+**Reads:** Until whitespace (space, tab, newline)
+
+```cpp
+ifstream in("data.txt");
+string word;
+
+// Read word by word
+while (in >> word) {
+    cout << word << endl;
+}
+```
+
+**Example with numbers:**
+
+```cpp
+// File: numbers.txt contains "10 20 30 40"
+ifstream in("numbers.txt");
+int num;
+
+while (in >> num) {
+    cout << "Read: " << num << endl;
+}
+// Output:
+// Read: 10
+// Read: 20
+// Read: 30
+// Read: 40
+```
+
+**Use Case:** Reading structured data (numbers, single words)
+
+</details>
+
+<details>
+<summary><b>Method B: `getline()` (Read Full Line)</b></summary>
+
+**Reads:** Entire line including spaces, stops at newline
+
+```cpp
+ifstream in("poem.txt");
+string line;
+
+while (getline(in, line)) {
+    cout << line << endl;
+}
+```
+
+**Example with processing:**
+
+```cpp
+// File: data.csv
+// Name,Age,City
+// Alice,25,NYC
+// Bob,30,LA
+
+ifstream in("data.csv");
+string line;
+
+// Skip header
+getline(in, line);
+
+// Process data lines
+while (getline(in, line)) {
+    cout << "Processing: " << line << endl;
+    // Parse CSV line...
+}
+```
+
+**Custom delimiter:**
+
+```cpp
+// Read until semicolon instead of newline
+string segment;
+getline(in, segment, ';');
+```
+
+**Use Case:** Reading logs, CSV files, multi-word data
+
+</details>
+
+<details>
+<summary><b>Method C: `.get()` (Read Single Character)</b></summary>
+
+**Reads:** One character, including spaces and newlines
+
+```cpp
+ifstream in("text.txt");
+char ch;
+
+while (in.get(ch)) {
+    cout << ch;  // Prints every character including spaces
+}
+```
+
+**Difference from `>>` operator:**
+
+```cpp
+// File contains: "A B C"
+
+// Using >> (skips whitespace)
+char c;
+while (in >> c) {
+    cout << c;  // Output: ABC
+}
+
+// Using .get() (includes whitespace)
+char c;
+while (in.get(c)) {
+    cout << c;  // Output: A B C
+}
+```
+
+**Use Case:** Character-by-character processing, parsing complex formats
+
+</details>
+
+<details>
+<summary><b>Method D: `.read()` (Binary Read)</b></summary>
+
+**Reads:** Fixed number of bytes (for binary data)
+
+**Syntax:** `stream.read(buffer, size)`
+
+```cpp
+ifstream file("image.png", ios::binary);
+char buffer[1024];
+
+// Read 1024 bytes
+file.read(buffer, 1024);
+
+// Check how many bytes were actually read
+streamsize bytesRead = file.gcount();
+cout << "Read " << bytesRead << " bytes" << endl;
+```
+
+**Reading entire binary file:**
+
+```cpp
+ifstream file("data.bin", ios::binary | ios::ate);
+
+// Get file size
+streamsize size = file.tellg();
+file.seekg(0, ios::beg);
+
+// Allocate buffer
+char* buffer = new char[size];
+
+// Read entire file
+file.read(buffer, size);
+
+// Use buffer...
+delete[] buffer;
+file.close();
+```
+
+**Use Case:** Reading binary files (images, executables, custom formats)
+
+</details>
+
+---
+
+### 📊 Reading Methods Comparison
+
+| Method | Stops At | Includes Spaces? | Use Case |
+|--------|----------|------------------|----------|
+| `>>` | Whitespace | No | Structured data |
+| `getline()` | Newline | Yes | Full lines |
+| `.get()` | Nothing (1 char) | Yes | Character parsing |
+| `.read()` | Fixed size | Yes | Binary data |
+
+</details>
+
+<details>
+<summary><b>🔹 Writing to Files - 3 Methods</b></summary>
+
+### ✅ 8️⃣ Writing Functions
+
+<details>
+<summary><b>Method A: Using `<<` operator</b></summary>
+
+**Most Common Method** for text output
+
+```cpp
+ofstream out("output.txt");
+
+out << "Hello, World!" << endl;
+out << "Number: " << 42 << endl;
+out << "Pi: " << 3.14159 << endl;
+```
+
+**Formatted Output:**
+
+```cpp
+ofstream log("results.txt");
+
+log << "Test Results" << endl;
+log << "=============" << endl;
+log << "Score: " << 95 << "/100" << endl;
+log << "Grade: A" << endl;
+```
+
+**Chaining:**
+
+```cpp
+out << "Name: " << name << ", Age: " << age << ", Score: " << score << endl;
+```
+
+**Use Case:** Logging, reports, human-readable output
+
+</details>
+
+<details>
+<summary><b>Method B: `.put()` (Write Single Character)</b></summary>
+
+**Writes:** One character at a time
+
+```cpp
+ofstream out("chars.txt");
+
+out.put('A');
+out.put(' ');
+out.put('B');
+out.put('\n');
+
+// Output in file: A B
+```
+
+**Example - Writing characters from string:**
+
+```cpp
+ofstream out("output.txt");
+string text = "Hello";
+
+for (char c : text) {
+    out.put(c);
+}
+```
+
+**Use Case:** Character-level output, custom formatting
+
+</details>
+
+<details>
+<summary><b>Method C: `.write()` (Binary Write)</b></summary>
+
+**Writes:** Raw bytes (for binary data)
+
+**Syntax:** `stream.write(buffer, size)`
+
+```cpp
+ofstream file("data.bin", ios::binary);
+
+char buffer[] = {0x00, 0x01, 0x02, 0x03};
+file.write(buffer, 4);
+```
+
+**Writing structs:**
+
+```cpp
+struct Student {
+    char name[50];
+    int age;
+    float gpa;
+};
+
+ofstream file("students.dat", ios::binary);
+Student s = {"Alice", 20, 3.8};
+
+file.write(reinterpret_cast<char*>(&s), sizeof(s));
+```
+
+**Writing arrays:**
+
+```cpp
+int numbers[] = {10, 20, 30, 40, 50};
+ofstream file("numbers.bin", ios::binary);
+
+file.write(reinterpret_cast<char*>(numbers), sizeof(numbers));
+```
+
+**Use Case:** Binary files, serialization, efficient storage
+
+</details>
+
+---
+
+### 📊 Writing Methods Comparison
+
+| Method | Output Type | Formatting | Use Case |
+|--------|-------------|------------|----------|
+| `<<` | Text | Automatic | Human-readable |
+| `.put()` | Single char | None | Character control |
+| `.write()` | Binary | None | Raw data |
+
+</details>
+
+<details>
+<summary><b>🔹 File Position Functions - Navigation & Control ⭐</b></summary>
+
+### ✅ 9️⃣ Position Functions (VERY IMPORTANT for Interviews!)
+
+<details>
+<summary><b>Function 1: `.seekg()` - Move GET Pointer (Read Position)</b></summary>
+
+**Purpose:** Control where to read from
+
+**Syntax:** `stream.seekg(position, direction)`
+
+**Directions:**
+- `ios::beg` → From beginning
+- `ios::cur` → From current position
+- `ios::end` → From end
+
+```cpp
+ifstream in("data.txt");
+
+// Move to beginning
+in.seekg(0, ios::beg);
+
+// Move to 10th byte from beginning
+in.seekg(10, ios::beg);
+
+// Move 5 bytes forward from current position
+in.seekg(5, ios::cur);
+
+// Move to 10 bytes before end
+in.seekg(-10, ios::end);
+```
+
+**Example - Reading file in reverse:**
+
+```cpp
+ifstream in("data.txt", ios::ate);  // Open at end
+
+// Get file size
+streamsize size = in.tellg();
+
+// Read backwards
+for (int i = size - 1; i >= 0; i--) {
+    in.seekg(i);
+    char c;
+    in.get(c);
+    cout << c;
+}
+```
+
+**Example - Skip header:**
+
+```cpp
+ifstream in("data.csv");
+
+// Skip first 100 bytes (header)
+in.seekg(100, ios::beg);
+
+// Now read actual data
+string line;
+getline(in, line);
+```
+
+</details>
+
+<details>
+<summary><b>Function 2: `.seekp()` - Move PUT Pointer (Write Position)</b></summary>
+
+**Purpose:** Control where to write
+
+```cpp
+ofstream out("output.txt");
+
+out << "Hello";
+
+// Move to beginning
+out.seekp(0, ios::beg);
+
+// Overwrite with 'X'
+out << "X";  // File now contains: "Xello"
+```
+
+**Example - Modify specific position:**
+
+```cpp
+fstream file("data.txt", ios::in | ios::out);
+
+// Write initial data
+file << "ABCDEFGH";
+
+// Move to 3rd position
+file.seekp(3);
+
+// Overwrite
+file << "XYZ";  // File now: "ABCXYZGH"
+```
+
+**Example - Append at specific position:**
+
+```cpp
+fstream file("numbers.txt", ios::in | ios::out);
+
+// Go to end
+file.seekp(0, ios::end);
+
+// Append
+file << "\nNew Line";
+```
+
+</details>
+
+<details>
+<summary><b>Function 3: `.tellg()` - Get Current READ Position</b></summary>
+
+**Returns:** Current position of get pointer
+
+```cpp
+ifstream in("data.txt");
+
+cout << "Start position: " << in.tellg() << endl;  // 0
+
+char buffer[10];
+in.read(buffer, 10);
+
+cout << "After reading 10 bytes: " << in.tellg() << endl;  // 10
+```
+
+**Example - Get file size:**
+
+```cpp
+ifstream in("data.txt", ios::ate);  // Open at end
+
+streamsize fileSize = in.tellg();
+cout << "File size: " << fileSize << " bytes" << endl;
+
+in.seekg(0, ios::beg);  // Go back to beginning
+```
+
+**Example - Track reading progress:**
+
+```cpp
+ifstream in("large_file.txt", ios::ate);
+streamsize totalSize = in.tellg();
+in.seekg(0, ios::beg);
+
+string line;
+while (getline(in, line)) {
+    streamsize current = in.tellg();
+    int progress = (current * 100) / totalSize;
+    cout << "Progress: " << progress << "%" << endl;
+}
+```
+
+</details>
+
+<details>
+<summary><b>Function 4: `.tellp()` - Get Current WRITE Position</b></summary>
+
+**Returns:** Current position of put pointer
+
+```cpp
+ofstream out("output.txt");
+
+cout << "Start: " << out.tellp() << endl;  // 0
+
+out << "Hello";
+cout << "After 'Hello': " << out.tellp() << endl;  // 5
+
+out << " World";
+cout << "After ' World': " << out.tellp() << endl;  // 11
+```
+
+**Example - Track bytes written:**
+
+```cpp
+ofstream log("app.log");
+streamsize bytesWritten = 0;
+
+log << "Log entry 1" << endl;
+bytesWritten = log.tellp();
+cout << "Bytes written: " << bytesWritten << endl;
+
+log << "Log entry 2" << endl;
+bytesWritten = log.tellp();
+cout << "Total bytes: " << bytesWritten << endl;
+```
+
+</details>
+
+---
+
+### 🎯 Position Functions Summary
+
+| Function | Purpose | Returns | Use With |
+|----------|---------|---------|----------|
+| `.seekg()` | Move read position | void | `ifstream`, `fstream` |
+| `.seekp()` | Move write position | void | `ofstream`, `fstream` |
+| `.tellg()` | Get read position | `streamsize` | `ifstream`, `fstream` |
+| `.tellp()` | Get write position | `streamsize` | `ofstream`, `fstream` |
+
+### 💡 Common Patterns
+
+**Get file size:**
+```cpp
+ifstream in("file.txt", ios::ate);
+streamsize size = in.tellg();
+```
+
+**Read from middle:**
+```cpp
+in.seekg(100);  // Skip first 100 bytes
+```
+
+**Overwrite specific position:**
+```cpp
+file.seekp(50);
+file << "NEW DATA";
+```
+
+</details>
+
+<details>
+<summary><b>🔹 End of File Detection</b></summary>
+
+### ✅ 🔟 `.eof()` - Check End of File
+
+**Returns:** `true` if end of file reached
+
+```cpp
+ifstream in("data.txt");
+
+while (!in.eof()) {
+    string line;
+    getline(in, line);
+    cout << line << endl;
+}
+```
+
+#### ⚠️ Common Mistake:
+
+```cpp
+// WRONG - reads last line twice!
+while (!in.eof()) {
+    string line;
+    getline(in, line);
+    cout << line << endl;  // Last line printed twice
+}
+```
+
+#### ✅ Correct Pattern:
+
+```cpp
+// Method 1: Check operation result
+string line;
+while (getline(in, line)) {
+    cout << line << endl;
+}
+
+// Method 2: Check before read
+while (!in.eof()) {
+    string line;
+    if (getline(in, line)) {
+        cout << line << endl;
+    }
+}
+```
+
+#### When to Use `.eof()`:
+
+```cpp
+// Reading binary data
+ifstream file("data.bin", ios::binary);
+char byte;
+
+while (!file.eof()) {
+    file.get(byte);
+    if (!file.eof()) {  // Check again after read
+        processByte(byte);
+    }
+}
+```
+
+**Best Practice:** Prefer checking the stream operation result rather than `.eof()`
+
+</details>
+
+<details>
+<summary><b>🔹 Complete Real-World Examples</b></summary>
+
+### 📝 Example 1: Read and Process CSV File
+
+```cpp
+#include <fstream>
+#include <sstream>
+#include <vector>
+
+void processCSV(const string& filename) {
+    ifstream file(filename);
+    
+    if (!file.is_open()) {
+        cerr << "Cannot open file: " << filename << endl;
+        return;
+    }
+    
+    string line;
+    
+    // Skip header
+    getline(file, line);
+    
+    // Process each line
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string name, ageStr, city;
+        
+        getline(ss, name, ',');
+        getline(ss, ageStr, ',');
+        getline(ss, city, ',');
+        
+        int age = stoi(ageStr);
+        
+        cout << "Name: " << name 
+             << ", Age: " << age 
+             << ", City: " << city << endl;
+    }
+    
+    file.close();
+}
+```
+
+---
+
+### 📝 Example 2: Copy File with Progress
+
+```cpp
+void copyFile(const string& source, const string& dest) {
+    ifstream in(source, ios::binary | ios::ate);
+    
+    if (!in.is_open()) {
+        cerr << "Cannot open source file" << endl;
+        return;
+    }
+    
+    // Get file size
+    streamsize size = in.tellg();
+    in.seekg(0, ios::beg);
+    
+    ofstream out(dest, ios::binary);
+    
+    if (!out.is_open()) {
+        cerr << "Cannot create destination file" << endl;
+        return;
+    }
+    
+    // Copy in chunks
+    const int BUFFER_SIZE = 4096;
+    char buffer[BUFFER_SIZE];
+    streamsize copied = 0;
+    
+    while (in.read(buffer, BUFFER_SIZE) || in.gcount() > 0) {
+        streamsize bytesRead = in.gcount();
+        out.write(buffer, bytesRead);
+        
+        copied += bytesRead;
+        int progress = (copied * 100) / size;
+        cout << "\rProgress: " << progress << "%" << flush;
+    }
+    
+    cout << "\nCopy complete!" << endl;
+    
+    in.close();
+    out.close();
+}
+```
+
+---
+
+### 📝 Example 3: Log File Manager
+
+```cpp
+class Logger {
+private:
+    ofstream logFile;
+    
+public:
+    Logger(const string& filename) {
+        logFile.open(filename, ios::app);
+    }
+    
+    ~Logger() {
+        if (logFile.is_open()) {
+            logFile.close();
+        }
+    }
+    
+    void log(const string& message) {
+        if (!logFile.is_open()) return;
+        
+        // Get current time
+        time_t now = time(0);
+        char* dt = ctime(&now);
+        
+        // Remove newline from ctime
+        string timestamp(dt);
+        timestamp.pop_back();
+        
+        logFile << "[" << timestamp << "] " << message << endl;
+    }
+};
+
+// Usage
+Logger logger("app.log");
+logger.log("Application started");
+logger.log("Processing data...");
+logger.log("Application finished");
+```
+
+---
+
+### 📝 Example 4: Binary File Read/Write with Struct
+
+```cpp
+struct Student {
+    char name[50];
+    int rollNo;
+    float marks;
+};
+
+// Write students to binary file
+void saveStudents(const vector<Student>& students, const string& filename) {
+    ofstream file(filename, ios::binary);
+    
+    if (!file.is_open()) {
+        cerr << "Cannot create file" << endl;
+        return;
+    }
+    
+    for (const auto& student : students) {
+        file.write(reinterpret_cast<const char*>(&student), sizeof(Student));
+    }
+    
+    file.close();
+    cout << "Saved " << students.size() << " students" << endl;
+}
+
+// Read students from binary file
+vector<Student> loadStudents(const string& filename) {
+    ifstream file(filename, ios::binary);
+    vector<Student> students;
+    
+    if (!file.is_open()) {
+        cerr << "Cannot open file" << endl;
+        return students;
+    }
+    
+    Student temp;
+    while (file.read(reinterpret_cast<char*>(&temp), sizeof(Student))) {
+        students.push_back(temp);
+    }
+    
+    file.close();
+    cout << "Loaded " << students.size() << " students" << endl;
+    
+    return students;
+}
+```
+
+---
+
+### 📝 Example 5: File Search and Replace
+
+```cpp
+void searchAndReplace(const string& filename, 
+                      const string& searchStr, 
+                      const string& replaceStr) {
+    ifstream inFile(filename);
+    
+    if (!inFile.is_open()) {
+        cerr << "Cannot open file" << endl;
+        return;
+    }
+    
+    // Read entire file
+    stringstream buffer;
+    buffer << inFile.rdbuf();
+    string content = buffer.str();
+    inFile.close();
+    
+    // Replace all occurrences
+    size_t pos = 0;
+    int count = 0;
+    
+    while ((pos = content.find(searchStr, pos)) != string::npos) {
+        content.replace(pos, searchStr.length(), replaceStr);
+        pos += replaceStr.length();
+        count++;
+    }
+    
+    // Write back
+    ofstream outFile(filename);
+    outFile << content;
+    outFile.close();
+    
+    cout << "Replaced " << count << " occurrences" << endl;
+}
+```
+
+</details>
+
+<details>
+<summary><b>🔹 Common Patterns & Best Practices</b></summary>
+
+### ✅ Pattern 1: Safe File Opening
+
+```cpp
+ifstream file(filename);
+
+if (!file.is_open()) {
+    cerr << "Error: Cannot open file '" << filename << "'" << endl;
+    return false;
+}
+
+// Proceed with file operations
+```
+
+---
+
+### ✅ Pattern 2: RAII (Automatic Closing)
+
+```cpp
+void processFile(const string& filename) {
+    ifstream file(filename);  // Opens file
+    
+    // Do work...
+    
+} // file automatically closed when going out of scope
+```
+
+---
+
+### ✅ Pattern 3: Reading Line by Line
+
+```cpp
+ifstream file("data.txt");
+string line;
+
+while (getline(file, line)) {
+    // Process each line
+    cout << line << endl;
+}
+```
+
+---
+
+### ✅ Pattern 4: Reading Numbers
+
+```cpp
+ifstream file("numbers.txt");
+int num;
+
+while (file >> num) {
+    // Process each number
+    cout << num << endl;
+}
+```
+
+---
+
+### ✅ Pattern 5: Error Recovery
+
+```cpp
+ifstream file("data.txt");
+int value;
+
+while (file >> value) {
+    if (file.fail()) {
+        file.clear();  // Clear error flags
+        string dummy;
+        file >> dummy;  // Skip invalid input
+        continue;
+    }
+    
+    // Process valid value
+}
+```
+
+---
+
+### 🚫 Common Mistakes to Avoid
+
+#### ❌ Not checking if file opened
+```cpp
+// WRONG
+ifstream file("data.txt");
+string data;
+file >> data;  // May fail silently
+```
+
+#### ✅ Always check
+```cpp
+ifstream file("data.txt");
+if (!file.is_open()) return;
+string data;
+file >> data;
+```
+
+---
+
+#### ❌ Using .eof() incorrectly
+```cpp
+// WRONG - reads last item twice
+while (!file.eof()) {
+    file >> data;
+    process(data);
+}
+```
+
+#### ✅ Check operation result
+```cpp
+while (file >> data) {
+    process(data);
+}
+```
+
+---
+
+### 💡 Performance Tips
+
+1. **Use binary mode for large files**
+   ```cpp
+   ifstream file("large.dat", ios::binary);
+   ```
+
+2. **Buffer reads for efficiency**
+   ```cpp
+   char buffer[4096];
+   file.read(buffer, 4096);
+   ```
+
+3. **Reserve space for strings**
+   ```cpp
+   string content;
+   content.reserve(fileSize);
+   ```
+
+4. **Use `.rdbuf()` for entire file**
+   ```cpp
+   stringstream buffer;
+   buffer << file.rdbuf();
+   ```
+
+</details>
+
+<details>
+<summary><b>🔹 Quick Reference Cheat Sheet</b></summary>
+
+| Task | Code |
+|------|------|
+| Read file | `ifstream in("file.txt");` |
+| Write file | `ofstream out("file.txt");` |
+| Append | `ofstream out("file.txt", ios::app);` |
+| Check if open | `if (!file.is_open())` |
+| Read line | `getline(file, line);` |
+| Read word | `file >> word;` |
+| Write text | `file << "text";` |
+| Get file size | `file.seekg(0, ios::end); size = file.tellg();` |
+| Go to start | `file.seekg(0, ios::beg);` |
+| Binary read | `file.read(buffer, size);` |
+| Binary write | `file.write(buffer, size);` |
+| Close file | `file.close();` |
+
+</details>
+
+---
+
 ## 🗂️ `<algorithm>` Library
 
 <details>
