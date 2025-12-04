@@ -353,6 +353,363 @@ Add your `find()` documentation here with all variants and examples.
 
 ---
 
+## 📚 `<span>` Library - Lightweight View Over Contiguous Data (C++20)
+
+<details>
+<summary><b>🔹 What is std::span? - Overview & Benefits</b></summary>
+
+### ✅ Definition
+
+`std::span` is a **non-owning view** over a contiguous sequence of elements (arrays, vectors, etc.)
+
+**Key Benefits:**
+- No copying data (just references)
+- Works with C-arrays, std::array, std::vector
+- Bounds checking with `.at()`
+- Modern replacement for pointer + size pairs
+```cpp
+#include <span>
+
+vector<int> vec = {1, 2, 3, 4, 5};
+span<int> s = vec;  // No copy, just a view
+```
+
+</details>
+
+<details>
+<summary><b>🔹 Creating spans - Multiple Ways</b></summary>
+
+### Method 1: From std::vector
+```cpp
+vector<int> vec = {1, 2, 3, 4, 5};
+span<int> s = vec;
+```
+
+### Method 2: From C-array
+```cpp
+int arr[] = {10, 20, 30};
+span<int> s = arr;
+```
+
+### Method 3: From std::array
+```cpp
+array<int, 4> arr = {1, 2, 3, 4};
+span<int> s = arr;
+```
+
+### Method 4: Subspan
+```cpp
+vector<int> vec = {1, 2, 3, 4, 5};
+span<int> s = span(vec).subspan(1, 3);  // {2, 3, 4}
+```
+
+</details>
+
+<details>
+<summary><b>🔹 .size() - Get Number of Elements</b></summary>
+
+### Syntax
+```cpp
+size_t size = s.size();
+```
+
+### Example
+```cpp
+vector<int> vec = {10, 20, 30, 40};
+span<int> s = vec;
+
+cout << "Size: " << s.size() << endl;  // Output: 4
+```
+
+**Use Case:** Check how many elements in the span
+
+</details>
+
+<details>
+<summary><b>🔹 .empty() - Check if Empty</b></summary>
+
+### Syntax
+```cpp
+bool isEmpty = s.empty();
+```
+
+### Example
+```cpp
+span<int> s;
+if (s.empty()) {
+    cout << "Span is empty!" << endl;
+}
+```
+
+**Use Case:** Validate before processing
+
+</details>
+
+<details>
+<summary><b>🔹 Accessing Elements - [] vs .at() vs .front() vs .back()</b></summary>
+
+### Method 1: Using `[]` (No bounds checking)
+```cpp
+span<int> s = vec;
+cout << s[0] << endl;  // First element
+```
+
+### Method 2: Using `.at()` (With bounds checking)
+```cpp
+cout << s.at(0) << endl;  // Throws exception if out of bounds
+```
+
+### Method 3: `.front()` - First Element
+```cpp
+cout << s.front() << endl;  // First element
+```
+
+### Method 4: `.back()` - Last Element
+```cpp
+cout << s.back() << endl;  // Last element
+```
+
+**Use Case:** Safe access with `.at()`, fast access with `[]`
+
+</details>
+
+<details>
+<summary><b>🔹 .data() - Get Pointer to First Element</b></summary>
+
+### Syntax
+```cpp
+int* ptr = s.data();
+```
+
+### Example
+```cpp
+span<int> s = vec;
+int* ptr = s.data();
+
+cout << *ptr << endl;  // First element
+cout << *(ptr + 1) << endl;  // Second element
+```
+
+**Use Case:** Interop with C-style APIs, pointer arithmetic
+
+</details>
+
+<details>
+<summary><b>🔹 .subspan() - Create Subview</b></summary>
+
+### Syntax
+```cpp
+span<T> subspan(size_t offset, size_t count);
+span<T> subspan(size_t offset);  // Till end
+```
+
+### Example 1: With count
+```cpp
+vector<int> vec = {1, 2, 3, 4, 5};
+span<int> s = vec;
+
+span<int> sub = s.subspan(1, 3);  // {2, 3, 4}
+```
+
+### Example 2: From offset to end
+```cpp
+span<int> sub = s.subspan(2);  // {3, 4, 5}
+```
+
+**Use Case:** Working with portions of data without copying
+
+</details>
+
+<details>
+<summary><b>🔹 .first() - Get First N Elements</b></summary>
+
+### Syntax
+```cpp
+span<T> first(size_t n);
+```
+
+### Example
+```cpp
+vector<int> vec = {1, 2, 3, 4, 5};
+span<int> s = vec;
+
+span<int> firstThree = s.first(3);  // {1, 2, 3}
+```
+
+**Use Case:** Extract prefix without copying
+
+</details>
+
+<details>
+<summary><b>🔹 .last() - Get Last N Elements</b></summary>
+
+### Syntax
+```cpp
+span<T> last(size_t n);
+```
+
+### Example
+```cpp
+vector<int> vec = {1, 2, 3, 4, 5};
+span<int> s = vec;
+
+span<int> lastTwo = s.last(2);  // {4, 5}
+```
+
+**Use Case:** Extract suffix without copying
+
+</details>
+
+<details>
+<summary><b>🔹 Iterators - begin(), end(), rbegin(), rend()</b></summary>
+
+### Forward Iteration
+```cpp
+span<int> s = vec;
+
+for (auto it = s.begin(); it != s.end(); ++it) {
+    cout << *it << " ";
+}
+```
+
+### Range-based for loop
+```cpp
+for (int val : s) {
+    cout << val << " ";
+}
+```
+
+### Reverse Iteration
+```cpp
+for (auto it = s.rbegin(); it != s.rend(); ++it) {
+    cout << *it << " ";
+}
+```
+
+**Use Case:** Standard iteration patterns
+
+</details>
+
+<details>
+<summary><b>🔹 .size_bytes() - Get Size in Bytes</b></summary>
+
+### Syntax
+```cpp
+size_t bytes = s.size_bytes();
+```
+
+### Example
+```cpp
+vector<int> vec = {1, 2, 3};  // 3 ints
+span<int> s = vec;
+
+cout << "Elements: " << s.size() << endl;  // 3
+cout << "Bytes: " << s.size_bytes() << endl;  // 12 (3 * sizeof(int))
+```
+
+**Use Case:** Memory calculations, binary I/O
+
+</details>
+
+<details>
+<summary><b>🔹 Modifying Through Span - Non-const Span</b></summary>
+
+### Example
+```cpp
+vector<int> vec = {1, 2, 3, 4, 5};
+span<int> s = vec;
+
+// Modify through span
+s[0] = 100;
+s[1] = 200;
+
+// Original vector is modified!
+cout << vec[0] << endl;  // 100
+```
+
+### Read-only span
+```cpp
+span<const int> readOnly = vec;
+// readOnly[0] = 10;  // ERROR: Cannot modify
+```
+
+**Use Case:** Pass by reference without copying, function parameters
+
+</details>
+
+<details>
+<summary><b>🔹 Common Patterns & Use Cases</b></summary>
+
+### Pattern 1: Function Parameter (Avoid copying)
+```cpp
+void processData(span<int> data) {
+    for (int val : data) {
+        cout << val << " ";
+    }
+}
+
+vector<int> vec = {1, 2, 3};
+int arr[] = {4, 5, 6};
+
+processData(vec);  // Works with vector
+processData(arr);  // Works with C-array
+```
+
+### Pattern 2: Slice Array Without Copying
+```cpp
+vector<int> vec = {10, 20, 30, 40, 50};
+span<int> middle = span(vec).subspan(1, 3);  // {20, 30, 40}
+```
+
+### Pattern 3: Safe Bounds Checking
+```cpp
+span<int> s = vec;
+
+try {
+    cout << s.at(100) << endl;  // Throws exception
+} catch (const out_of_range& e) {
+    cout << "Index out of bounds!" << endl;
+}
+```
+
+### Pattern 4: Working with Legacy APIs
+```cpp
+void legacy_c_function(int* data, size_t size);
+
+vector<int> vec = {1, 2, 3};
+span<int> s = vec;
+
+legacy_c_function(s.data(), s.size());
+```
+
+</details>
+
+<details>
+<summary><b>🔹 Quick Reference Cheat Sheet</b></summary>
+
+| Function | Purpose | Example |
+|----------|---------|---------|
+| `span<T> s = vec` | Create span | `span<int> s = vec;` |
+| `.size()` | Number of elements | `s.size()` → `5` |
+| `.empty()` | Check if empty | `s.empty()` → `false` |
+| `[index]` | Access element (unsafe) | `s[0]` |
+| `.at(index)` | Access with bounds check | `s.at(0)` |
+| `.front()` | First element | `s.front()` |
+| `.back()` | Last element | `s.back()` |
+| `.data()` | Pointer to first element | `s.data()` |
+| `.subspan(pos, count)` | Create subview | `s.subspan(1, 3)` |
+| `.first(n)` | First n elements | `s.first(3)` |
+| `.last(n)` | Last n elements | `s.last(2)` |
+| `.size_bytes()` | Size in bytes | `s.size_bytes()` |
+
+</details>
+
+---
+
+
+
+
+
 ## 📁 `<fstream>` Library - File I/O Operations
 
 <details>
