@@ -2021,14 +2021,473 @@ Add your priority queue documentation here (you can copy from your STL Quick Hel
 
 </details>
 
----
 
 <div align="center">
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 </div>
 
 
+
+
+## 🔄 C++ Type Casting - Complete Guide (C-Style vs C++ Casts)
+
+<details>
+<summary><b>🔹 Overview - Types of Casting in C++</b></summary>
+
+### C-Style Cast (Old, Not Recommended)
+```cpp
+int x = (int)3.14;    // C-style cast
+```
+
+### C++ Style Casts (Modern, Recommended)
+1. **`static_cast<T>()`** - Compile-time conversions
+2. **`dynamic_cast<T>()`** - Runtime polymorphic conversions
+3. **`const_cast<T>()`** - Add/remove const/volatile
+4. **`reinterpret_cast<T>()`** - Low-level bit reinterpretation
+
+### Why C++ Casts Are Better
+- ✅ **Explicit intent** - Clear what you're doing
+- ✅ **Type safety** - Compiler checks validity
+- ✅ **Searchable** - Easy to find in code
+- ✅ **Specific** - Each cast has specific purpose
+
+</details>
+
+<details>
+<summary><b>🔹 static_cast - Safe Compile-Time Conversions</b></summary>
+
+### Purpose
+Convert between related types at **compile time**
+
+### ✅ Valid Uses
+
+**Numeric conversions**
+```cpp
+double d = 3.14;
+int i = static_cast<int>(d);    // 3
+
+float f = 2.5f;
+int x = static_cast<int>(f);    // 2
+```
+
+**Pointer up-casting (safe)**
+```cpp
+class Base {};
+class Derived : public Base {};
+
+Derived* d = new Derived();
+Base* b = static_cast<Base*>(d);    // ✅ Safe upcast
+```
+
+**Void pointer conversions**
+```cpp
+int x = 42;
+void* ptr = &x;
+int* iptr = static_cast<int*>(ptr);    // ✅ Valid
+```
+
+**Enum to int**
+```cpp
+enum Color { RED, GREEN, BLUE };
+int val = static_cast<int>(RED);    // 0
+```
+
+### ❌ Cannot Do
+- Remove `const` (use `const_cast`)
+- Cast unrelated pointer types (use `reinterpret_cast`)
+- Downcast without runtime check (use `dynamic_cast`)
+
+### Use Case
+When you know the conversion is safe at compile time
+
+</details>
+
+<details>
+<summary><b>🔹 dynamic_cast - Runtime Polymorphic Conversions</b></summary>
+
+### Purpose
+**Safe downcasting** with runtime type checking (requires polymorphic base class)
+
+### Requirements
+- Base class must have at least one `virtual` function
+- Only works with pointers or references
+- Requires RTTI (Run-Time Type Information)
+
+### ✅ Safe Downcasting
+```cpp
+class Base {
+public:
+    virtual ~Base() {}    // Makes class polymorphic
+};
+
+class Derived : public Base {
+public:
+    void derivedMethod() {}
+};
+
+Base* basePtr = new Derived();
+
+// Safe downcast with runtime check
+Derived* derivedPtr = dynamic_cast<Derived*>(basePtr);
+
+if (derivedPtr != nullptr) {
+    derivedPtr->derivedMethod();    // ✅ Safe
+} else {
+    cout << "Cast failed!" << endl;
+}
+```
+
+### Return Values
+- **Pointer cast:** Returns `nullptr` if cast fails
+- **Reference cast:** Throws `bad_cast` exception if fails
+```cpp
+// Pointer version
+Derived* d = dynamic_cast<Derived*>(basePtr);
+if (d) { /* success */ }
+
+// Reference version
+try {
+    Derived& d = dynamic_cast<Derived&>(baseRef);
+} catch (bad_cast& e) {
+    cout << "Cast failed!" << endl;
+}
+```
+
+### ⚠️ Performance Note
+Has runtime overhead (type checking)
+
+### Use Case
+When you need to safely downcast in polymorphic hierarchies
+
+</details>
+
+<details>
+<summary><b>🔹 const_cast - Add/Remove const or volatile</b></summary>
+
+### Purpose
+**Only** modifies `const` or `volatile` qualifiers
+
+### ✅ Remove const
+```cpp
+const int x = 10;
+int* ptr = const_cast<int*>(&x);
+*ptr = 20;    // ⚠️ Undefined behavior if x is truly const!
+```
+
+**Safe usage:**
+```cpp
+void func(const string& s) {
+    string& modifiable = const_cast<string&>(s);
+    modifiable += " modified";
+}
+
+string str = "hello";
+func(str);    // ✅ Safe (original wasn't const)
+```
+
+### ✅ Add const
+```cpp
+int x = 10;
+const int* cptr = const_cast<const int*>(&x);
+```
+
+### ❌ Cannot Do
+- Change the type (only const/volatile)
+- Cast between different types
+
+### ⚠️ Danger Zone
+Modifying truly `const` data causes **undefined behavior**
+```cpp
+const int x = 10;                        // Truly const
+int* p = const_cast<int*>(&x);
+*p = 20;    // ❌ UNDEFINED BEHAVIOR
+```
+
+### Use Case
+- Working with legacy APIs that don't use `const` correctly
+- Implementing const and non-const versions of same function
+
+</details>
+
+<details>
+<summary><b>🔹 reinterpret_cast - Low-Level Bit Reinterpretation</b></summary>
+
+### Purpose
+**Dangerous** low-level cast that reinterprets bit pattern
+
+### ✅ Valid Uses
+
+**Pointer to integer**
+```cpp
+int* ptr = new int(42);
+uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
+cout << "Address: " << addr << endl;
+```
+
+**Integer to pointer**
+```cpp
+uintptr_t addr = 0x12345678;
+int* ptr = reinterpret_cast<int*>(addr);
+```
+
+**Unrelated pointer types**
+```cpp
+struct A { int x; };
+struct B { int y; };
+
+A* a = new A();
+B* b = reinterpret_cast<B*>(a);    // ⚠️ Dangerous!
+```
+
+**Function pointers**
+```cpp
+void (*funcPtr)() = reinterpret_cast<void(*)()>(address);
+```
+
+### ❌ Cannot Do
+- Remove `const` (use `const_cast`)
+- Cast between different types safely (use `static_cast`)
+
+### ⚠️ Major Warnings
+- **Platform dependent** - Results vary by compiler/OS
+- **No type safety** - Compiler can't protect you
+- **Undefined behavior** - Easy to misuse
+- **Breaks strict aliasing** - Can cause optimization bugs
+
+### Use Case
+- System programming
+- Hardware interfacing
+- Binary file I/O
+- Memory mapping
+
+**Rule:** Avoid unless absolutely necessary!
+
+</details>
+
+<details>
+<summary><b>🔹 C-Style Cast vs C++ Casts</b></summary>
+
+### C-Style Cast (Avoid!)
+```cpp
+double d = 3.14;
+int x = (int)d;                  // What does this do? 🤷
+
+Base* b = (Base*)derivedPtr;     // Safe? Unsafe? 🤷
+```
+
+**Problems:**
+- ❌ Unclear intent
+- ❌ Can do anything (too powerful)
+- ❌ Hard to search in code
+- ❌ No compiler safety
+
+### C++ Cast (Preferred!)
+```cpp
+int x = static_cast<int>(d);           // Clear: numeric conversion
+Base* b = static_cast<Base*>(derived); // Clear: upcast
+Derived* d = dynamic_cast<Derived*>(b); // Clear: safe downcast
+```
+
+**Benefits:**
+- ✅ Explicit intent
+- ✅ Compiler checks
+- ✅ Easy to find (grep for `_cast`)
+- ✅ Each has specific purpose
+
+### What C-Style Cast Actually Does
+Tries in this order:
+1. `const_cast`
+2. `static_cast`
+3. `static_cast` + `const_cast`
+4. `reinterpret_cast`
+5. `reinterpret_cast` + `const_cast`
+
+**Dangerous:** You don't know which one it picks!
+
+</details>
+
+<details>
+<summary><b>🔹 Common Casting Mistakes & How to Avoid</b></summary>
+
+### ❌ Mistake 1: Using C-Style Casts
+```cpp
+// BAD
+Base* b = (Base*)derived;
+
+// GOOD
+Base* b = static_cast<Base*>(derived);
+```
+
+### ❌ Mistake 2: Unsafe Downcasting
+```cpp
+// BAD - No runtime check
+Base* b = getBase();
+Derived* d = static_cast<Derived*>(b);    // ⚠️ May crash!
+d->derivedMethod();
+
+// GOOD - Runtime check
+Derived* d = dynamic_cast<Derived*>(b);
+if (d) {
+    d->derivedMethod();    // ✅ Safe
+}
+```
+
+### ❌ Mistake 3: Modifying const Data
+```cpp
+// BAD
+const int x = 10;
+int* p = const_cast<int*>(&x);
+*p = 20;    // ❌ UNDEFINED BEHAVIOR
+
+// GOOD - Only cast non-const to const
+int y = 10;
+const int* cp = &y;    // No cast needed
+```
+
+### ❌ Mistake 4: reinterpret_cast for Related Types
+```cpp
+// BAD
+Derived* d = reinterpret_cast<Derived*>(basePtr);    // ❌ Wrong cast!
+
+// GOOD
+Derived* d = dynamic_cast<Derived*>(basePtr);    // ✅ Safe
+```
+
+### ❌ Mistake 5: Casting Away const for Function Overload
+```cpp
+// BAD
+void func(string& s);
+
+const string cs = "hello";
+func(const_cast<string&>(cs));    // ❌ Dangerous!
+
+// GOOD - Provide const overload
+void func(const string& s);
+```
+
+</details>
+
+<details>
+<summary><b>🔹 Casting Decision Tree</b></summary>
+
+### Question 1: Do you need to cast at all?
+- **NO?** → Don't cast! Modern C++ often doesn't need casts
+- **YES?** → Continue
+
+### Question 2: What are you casting?
+- **Numeric types?** → Use `static_cast`
+- **Pointers in inheritance?** → Continue to Q3
+- **Adding/removing const?** → Use `const_cast`
+- **Low-level memory/pointers?** → Use `reinterpret_cast` (careful!)
+
+### Question 3: Inheritance hierarchy casting
+- **Upcasting (Derived → Base)?** → Use `static_cast` or implicit
+- **Downcasting (Base → Derived)?** → Continue to Q4
+
+### Question 4: Is it polymorphic?
+- **YES (has virtual functions)?** → Use `dynamic_cast`
+- **NO?** → Use `static_cast` (if you're 100% sure it's safe)
+
+### Quick Reference
+```
+Need to cast?
+    ├─ Numeric conversion? → static_cast
+    ├─ Polymorphic downcast? → dynamic_cast
+    ├─ Remove const? → const_cast (careful!)
+    ├─ Low-level reinterpret? → reinterpret_cast (danger!)
+    └─ Don't know? → Probably don't cast!
+```
+
+</details>
+
+<details>
+<summary><b>🔹 Summary Cheat Sheet</b></summary>
+
+| Cast Type | Purpose | Safe? | Example |
+|-----------|---------|-------|---------|
+| `static_cast` | Compile-time conversions | ✅ Yes | `static_cast<int>(3.14)` |
+| `dynamic_cast` | Runtime polymorphic cast | ✅ Yes | `dynamic_cast<Derived*>(base)` |
+| `const_cast` | Add/remove const | ⚠️ Careful | `const_cast<int*>(constPtr)` |
+| `reinterpret_cast` | Bit reinterpretation | ❌ Dangerous | `reinterpret_cast<int*>(addr)` |
+| C-style cast | Everything (bad) | ❌ Avoid | `(int)3.14` |
+
+### 🎯 Best Practices
+
+1. **Prefer no cast** - Modern C++ often doesn't need them
+2. **Use C++ casts** - Never use C-style `(Type)value`
+3. **static_cast first** - Start with safest option
+4. **dynamic_cast for polymorphism** - Runtime safety
+5. **Avoid const_cast** - Usually indicates design issue
+6. **Never reinterpret_cast** - Unless doing system programming
+7. **Check dynamic_cast result** - Always test for `nullptr`
+
+### Common Conversions
+```cpp
+// Numeric
+int i = static_cast<int>(3.14);
+
+// Upcasting (safe)
+Base* b = static_cast<Base*>(derived);
+
+// Downcasting (safe with check)
+Derived* d = dynamic_cast<Derived*>(base);
+if (d) { /* use d */ }
+
+// Const removal (careful!)
+int* p = const_cast<int*>(constPtr);
+
+// Pointer to int (rare)
+uintptr_t addr = reinterpret_cast<uintptr_t>(ptr);
+```
+
+</details>
+
+<details>
+<summary><b>🔹 Interview Tips</b></summary>
+
+### Common Questions
+
+**Q: "When would you use dynamic_cast vs static_cast?"**
+
+**A:**
+- `dynamic_cast`: When downcasting in polymorphic hierarchy and need runtime safety check
+- `static_cast`: When upcasting or converting between known compatible types at compile time
+
+**Q: "What's wrong with C-style casts?"**
+
+**A:**
+- Unclear intent - does too many things
+- Hard to search in codebase
+- No type safety
+- Can accidentally do dangerous operations
+
+**Q: "Can you remove const with static_cast?"**
+
+**A:**
+No, you need `const_cast`. This is intentional - removing const is dangerous and should be explicit.
+
+**Q: "What happens if dynamic_cast fails?"**
+
+**A:**
+- For pointers: Returns `nullptr`
+- For references: Throws `std::bad_cast` exception
+
+**Q: "When is reinterpret_cast necessary?"**
+
+**A:**
+- System programming
+- Hardware/memory-mapped I/O
+- Interfacing with legacy C code
+- Very rare in application code
+
+</details>
+
 ---
+
+
+
+
+
 
 ## ⚠️ `{}` vs `()` Initialization - Common Pitfalls & Safety Guide
 
@@ -2407,7 +2866,6 @@ append(it_begin, it_end);    // range [begin, end)
 
 </details>
 
----
 
 <div align="center">
   <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
